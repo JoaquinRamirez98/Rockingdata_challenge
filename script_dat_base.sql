@@ -1,0 +1,83 @@
+-- Crear la tabla Platforms
+CREATE TABLE Platforms (
+    id_platform SERIAL PRIMARY KEY,
+    platform_name VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- Crear la tabla ShowType
+CREATE TABLE ShowType (
+    id_showtype SERIAL PRIMARY KEY,
+    type_name VARCHAR(255) NOT NULL
+);
+
+-- Crear la tabla Role
+CREATE TABLE Role (
+    id_role SERIAL PRIMARY KEY,
+    role_name VARCHAR(255) NOT NULL
+);
+
+-- Crear la tabla Person con restricción única en full_name
+CREATE TABLE Person (
+    id_person SERIAL PRIMARY KEY UNIQUE,
+    full_name VARCHAR(255) NOT NULL UNIQUE,
+    CONSTRAINT unique_full_name UNIQUE (full_name)
+);
+
+-- Crear la tabla Rating
+CREATE TABLE Rating (
+    id_rating SERIAL PRIMARY KEY,
+    rating_name VARCHAR(255) UNIQUE
+);
+
+-- Crear la tabla Shows
+CREATE TABLE Shows (
+    id_show SERIAL PRIMARY KEY,
+    id_platform INT REFERENCES Platforms(id_platform),
+    id_showtype INT REFERENCES ShowType(id_showtype),
+    title VARCHAR(255),
+    date_added DATE,
+    duration INTEGER,
+    duration_str VARCHAR(255),
+    release_year INTEGER,
+    listed_in TEXT,
+    description TEXT
+);
+
+
+-- Crear la tabla Country
+CREATE TABLE Country (
+    id_country SERIAL PRIMARY KEY,
+    country_name VARCHAR(255) UNIQUE
+);
+
+-- Crear la tabla Casting con una clave primaria compuesta
+CREATE TABLE Casting (
+    id_person INT,
+    id_show INT,
+    id_role INT,
+    PRIMARY KEY (id_person, id_show, id_role),
+    FOREIGN KEY (id_person) REFERENCES Person(id_person),
+    FOREIGN KEY (id_show) REFERENCES Shows(id_show),
+    FOREIGN KEY (id_role) REFERENCES Role(id_role)
+);
+
+
+-- Crear la tabla Fact
+CREATE TABLE Fact (
+	id_show INT,
+    	id_showtype INT,
+	id_rating INT,
+    PRIMARY KEY (id_show, id_showtype, id_rating),
+    FOREIGN KEY (id_show) REFERENCES Shows(id_show),
+    FOREIGN KEY (id_showtype) REFERENCES ShowType(id_showtype),
+	FOREIGN KEY (id_rating) REFERENCES Rating(id_rating)
+);
+
+-- Crear la tabla show_country_rel
+CREATE TABLE Show_country_rel (
+	id_country INT,
+	id_show INT,
+	PRIMARY KEY (id_country, id_show),
+    FOREIGN KEY (id_country) REFERENCES Country(id_country),
+	FOREIGN KEY (id_show) REFERENCES Shows(id_show)
+);
