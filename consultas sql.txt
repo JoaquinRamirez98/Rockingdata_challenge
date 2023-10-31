@@ -1,0 +1,61 @@
+Punto 1:
+
+SELECT P.full_name, COUNT(C.id_person) AS appearance_count
+FROM Casting AS C
+JOIN Person AS P ON C.id_person = P.id_person
+JOIN Shows AS S ON C.id_show = S.id_show
+JOIN Platforms AS PL ON S.id_platform = PL.id_platform
+WHERE PL.platform_name = 'Netflix'
+AND C.id_role = 2 -- 2 representa el rol de actor
+GROUP BY P.full_name
+ORDER BY appearance_count DESC
+LIMIT 1;
+
+
+Punto 2:
+SELECT P.full_name, COUNT(C.id_person) AS appearance_count
+FROM Casting AS C
+JOIN Person AS P ON C.id_person = P.id_person
+JOIN Shows AS S ON C.id_show = S.id_show
+WHERE EXTRACT(YEAR FROM S.date_added) = 2015 --aca debe cambiar por el año que desee
+GROUP BY P.full_name
+ORDER BY appearance_count DESC
+LIMIT 10;
+
+Punto 3:
+-- Crear un procedimiento almacenado para obtener las 5 películas con mayor duración en minutos
+CREATE OR REPLACE FUNCTION GetTop5LongestMoviesByYear (IN year_param INT)
+RETURNS TABLE (
+    title VARCHAR(255),
+    duration INT
+) AS $$
+BEGIN
+    -- Crear una tabla temporal para almacenar los resultados
+    CREATE TEMPORARY TABLE IF NOT EXISTS TempTopMovies (
+        title VARCHAR(255),
+        duration INT
+    );
+
+    -- Insertar las películas con mayor duración en la tabla temporal
+    INSERT INTO TempTopMovies (title, duration)
+    SELECT s.title, s.duration
+    FROM Shows s
+    WHERE EXTRACT(YEAR FROM s.date_added) = year_param
+    ORDER BY s.duration DESC
+    LIMIT 5;
+
+    -- Devolver los resultados utilizando RETURN QUERY
+    RETURN QUERY
+    SELECT * FROM TempTopMovies;
+
+    -- Eliminar la tabla temporal
+    DROP TABLE IF EXISTS TempTopMovies;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM GetTop5LongestMoviesByYear(2019);
+
+
+
+
+
